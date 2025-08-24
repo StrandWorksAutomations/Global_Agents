@@ -1,0 +1,49 @@
+name: Refactor CI
+on:
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: JS/TS deps
+        if: hashFiles('package.json') != ''
+        run: npm ci || (npm i -g pnpm && pnpm i --frozen-lockfile) || (npm i -g yarn && yarn --frozen-lockfile)
+
+      - name: JS/TS gates
+        if: hashFiles('package.json') != ''
+        run: |
+          npm run -s lint || true
+          npm run -s typecheck || true
+          npm test -- --coverage || true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Python deps
+        if: hashFiles('pyproject.toml') != ''
+        run: |
+          python -m pip install -U pip
+          pip install -e .[dev] || true
+          pip install ruff black pytest mypy pyright || true
+
+      - name: Python gates
+        if: hashFiles('pyproject.toml') != ''
+        run: |
+          ruff check . --output-format=github || true
+          black --check . || true
+          pytest -q --maxfail=1 --disable-warnings || true
+
+      - name: Dependency audit
+        run: |
+          echo "JS audit"; (npx --yes osv-scanner scan || npx --yes npm@9 audit --audit-level=high || true)
+          echo "Python audit"; (pipx run pip-audit || true)

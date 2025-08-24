@@ -1,0 +1,43 @@
+language_targets:
+  javascript: true
+  typescript: true
+  python: true
+  sql: true
+
+modes:
+  dry_run: true
+  open_prs: true
+  max_pr_size: 400
+  concurrent_tasks: 4
+
+quality_gates:
+  require_clean_git: true
+  min_coverage: 80
+  eslint_error_block: true
+  ruff_error_block: true
+  typecheck_block: true
+
+security:
+  osv_scan: true
+  npm_audit: true
+  pip_audit: true
+  secret_scan: true
+
+compliance:
+  hipaa_context: false
+  asvs_level: 2
+
+commit:
+  conventional_commits: true
+  sign_commits: false
+
+ci:
+  github_actions: true
+  run_on_open_pr: true
+  run_on_push_to_main: false
+
+ignore:
+  - "node_modules/**"
+  - ".venv/**"
+  - "dist/**"
+  - "build/**"
