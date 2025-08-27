@@ -1,0 +1,149 @@
+TECHFORGE AI AGENT SUITE™ 
+ENTERPRISE LICENSE AGREEMENT
+
+Version 2.0.0
+Effective Date: January 2025
+
+IMPORTANT: READ CAREFULLY BEFORE USING THIS SOFTWARE
+
+This Enterprise License Agreement ("Agreement") is a legal agreement between you (either an 
+individual or a single entity, "Licensee") and TechForge AI, Inc. ("TechForge", "we", "us", 
+or "our") for the TechForge AI Agent Suite software product, which includes computer software 
+and may include associated media, printed materials, and "online" or electronic documentation 
+("Software").
+
+BY INSTALLING, COPYING, OR OTHERWISE USING THE SOFTWARE, YOU AGREE TO BE BOUND BY THE TERMS 
+OF THIS AGREEMENT. IF YOU DO NOT AGREE TO THE TERMS OF THIS AGREEMENT, DO NOT INSTALL OR USE 
+THE SOFTWARE.
+
+1. GRANT OF LICENSE
+-------------------
+Subject to the terms and conditions of this Agreement, TechForge grants Licensee a 
+non-exclusive, non-transferable license to:
+- Install and use the Software on unlimited devices within your organization
+- Deploy the Software agents for commercial purposes
+- Modify agent configurations for your specific use cases
+- Integrate the Software with your existing systems and workflows
+
+2. LICENSE TYPES
+----------------
+STARTER LICENSE ($299/month):
+- Access to 3 AI agents of your choice
+- Community support
+- Basic analytics
+- Single workspace
+
+PROFESSIONAL LICENSE ($999/month):
+- Access to 8 AI agents of your choice
+- Priority support (24-hour response time)
+- Advanced analytics and reporting
+- Up to 5 workspaces
+- Custom agent configurations
+
+ENTERPRISE LICENSE (Custom pricing):
+- Access to all 14 AI agents
+- Dedicated support team
+- Custom agent training on your codebase
+- Unlimited workspaces
+- On-premise deployment option
+- SLA guarantee (99.9% uptime)
+- Custom integrations
+- White-labeling options
+
+3. RESTRICTIONS
+---------------
+Licensee may NOT:
+- Reverse engineer, decompile, or disassemble the Software
+- Rent, lease, or lend the Software
+- Remove any proprietary notices or labels
+- Use the Software to create competing products
+- Share license keys or authentication credentials
+- Use the Software for illegal or unethical purposes
+- Exceed the agent limits specified in your license tier
+
+4. INTELLECTUAL PROPERTY
+------------------------
+The Software is protected by copyright laws and international copyright treaties, as well as 
+other intellectual property laws and treaties. TechForge retains all rights, title, and 
+interest in and to the Software, including all copyrights, patents, trade secret rights, 
+trademarks, and other intellectual property rights therein.
+
+5. DATA PRIVACY AND SECURITY
+-----------------------------
+- TechForge implements industry-standard security measures to protect your data
+- All data transmission is encrypted using TLS 1.3 or higher
+- We maintain SOC 2 Type II compliance
+- Your code and data remain your property
+- We do not train our models on your proprietary code without explicit consent
+- Detailed privacy policy available at: https://techforge.ai/privacy
+
+6. SUPPORT AND UPDATES
+----------------------
+- Support level depends on your license tier
+- All licenses include access to patch updates
+- Major version updates may require additional fees
+- Legacy version support provided for 12 months after new major release
+
+7. WARRANTY DISCLAIMER
+----------------------
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING 
+BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND 
+NONINFRINGEMENT. TECHFORGE DOES NOT WARRANT THAT THE SOFTWARE WILL BE ERROR-FREE OR THAT 
+OPERATION WILL BE UNINTERRUPTED.
+
+8. LIMITATION OF LIABILITY
+--------------------------
+IN NO EVENT SHALL TECHFORGE BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL 
+DAMAGES WHATSOEVER ARISING OUT OF THE USE OF OR INABILITY TO USE THE SOFTWARE, EVEN IF 
+TECHFORGE HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+9. TERMINATION
+--------------
+This Agreement is effective until terminated. Your rights under this Agreement will terminate 
+automatically without notice from TechForge if you fail to comply with any term(s) of this 
+Agreement. Upon termination, you shall cease all use of the Software and destroy all copies.
+
+10. GOVERNING LAW
+-----------------
+This Agreement shall be governed by the laws of the State of California, United States, 
+excluding its conflicts of law rules.
+
+11. ENTIRE AGREEMENT
+--------------------
+This Agreement constitutes the entire agreement between the parties and supersedes all prior 
+or contemporaneous understandings regarding such subject matter.
+
+12. CONTACT INFORMATION
+------------------------
+TechForge AI, Inc.
+100 AI Boulevard, Suite 500
+San Francisco, CA 94105
+United States
+
+Email: legal@techforge.ai
+Phone: 1-800-TECHFORGE
+Website: https://techforge.ai
+
+13. THIRD-PARTY LICENSES
+-------------------------
+The Software may include third-party open source components. These components are licensed 
+under their respective licenses, which can be found in the THIRD_PARTY_LICENSES file included 
+with the Software distribution.
+
+14. EXPORT COMPLIANCE
+----------------------
+You acknowledge that the Software may be subject to export laws and regulations of the United 
+States and other countries. You agree to comply with all applicable export laws and regulations.
+
+15. AUDIT RIGHTS
+----------------
+TechForge reserves the right to audit your use of the Software to ensure compliance with this 
+Agreement. Such audits will be conducted with reasonable notice and during normal business hours.
+
+---
+
+Copyright © 2025 TechForge AI, Inc. All rights reserved.
+
+TechForge™, TechForge AI Agent Suite™, and the TechForge logo are trademarks of TechForge AI, Inc.
+
+All other trademarks are the property of their respective owners.

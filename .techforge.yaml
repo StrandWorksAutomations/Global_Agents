@@ -1,0 +1,208 @@
+# TechForge Agent Suite Configuration
+# Global configuration for agent deployment and management
+
+version: 2.0.0
+project_type: multi-agent-suite
+
+# Agent Registry
+agents:
+  core_engineering:
+    - id: backend-expert
+      enabled: true
+      auto_deploy: false
+      config:
+        languages: [nodejs, python, java, go]
+        frameworks: [express, django, spring, gin]
+        
+    - id: frontend-expert
+      enabled: true
+      auto_deploy: false
+      config:
+        frameworks: [react, vue, angular]
+        build_tools: [webpack, vite]
+        
+    - id: database-expert
+      enabled: true
+      auto_deploy: false
+      config:
+        databases: [postgresql, mongodb, redis]
+        optimization: aggressive
+        
+    - id: devops-expert
+      enabled: true
+      auto_deploy: false
+      config:
+        platforms: [aws, gcp, azure]
+        orchestration: kubernetes
+        iac: terraform
+        
+    - id: security-expert
+      enabled: true
+      auto_deploy: false
+      config:
+        scan_level: comprehensive
+        compliance: [owasp, pci-dss, gdpr]
+        
+  specialized:
+    - id: refactor-agent
+      enabled: true
+      auto_deploy: false
+      config:
+        safety_gates: strict
+        test_preservation: true
+        semantic_diff: true
+
+# Deployment Settings
+deployment:
+  default_mode: interactive
+  parallel_execution: true
+  max_concurrent_agents: 5
+  resource_limits:
+    cpu_per_agent: 2
+    memory_per_agent: 4GB
+    
+# Team Presets
+teams:
+  fullstack:
+    name: "Full-Stack Development Team"
+    description: "Complete development team for full-stack applications"
+    agents: [backend-expert, frontend-expert, database-expert, devops-expert, qa-expert]
+    coordination: orchestrated
+    
+  mobile:
+    name: "Mobile Development Team"
+    description: "Mobile app development with backend support"
+    agents: [mobile-expert, backend-expert, database-expert, qa-expert]
+    coordination: collaborative
+    
+  enterprise:
+    name: "Enterprise Development Team"
+    description: "Large-scale enterprise application development"
+    agents: [backend-expert, frontend-expert, database-expert, devops-expert, security-expert, qa-expert]
+    coordination: hierarchical
+    
+  mvp:
+    name: "MVP Development Team"
+    description: "Rapid MVP development with core features"
+    agents: [backend-expert, frontend-expert, database-expert]
+    coordination: agile
+
+# Integration Settings
+integrations:
+  version_control:
+    enabled: true
+    providers: [github, gitlab, bitbucket]
+    auto_commit: false
+    branch_protection: true
+    
+  project_management:
+    enabled: true
+    providers: [jira, linear, asana]
+    auto_ticket_creation: false
+    
+  communication:
+    enabled: true
+    providers: [slack, teams, discord]
+    notifications: critical_only
+    real_time:
+      enabled: true
+      server_url: http://localhost:3000
+      ws_url: ws://localhost:8081
+      auto_start: true
+      showcase_url: http://localhost:5173
+    
+  ci_cd:
+    enabled: true
+    providers: [jenkins, github-actions, gitlab-ci]
+    auto_pipeline_generation: true
+    
+  monitoring:
+    enabled: true
+    providers: [datadog, newrelic, sentry]
+    alert_threshold: error
+
+# Analytics & Telemetry
+analytics:
+  enabled: true
+  metrics_collection: true
+  performance_tracking: true
+  usage_statistics: true
+  anonymized: true
+  endpoint: https://api.techforge.ai/telemetry
+  
+# Security Settings
+security:
+  api_key_required: true
+  encryption: aes-256-gcm
+  audit_logging: true
+  compliance_mode: strict
+  secret_scanning: true
+  vulnerability_scanning: true
+  
+# Performance Optimization
+performance:
+  caching:
+    enabled: true
+    ttl: 3600
+    strategy: lru
+    
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 100
+    burst_size: 20
+    
+  auto_scaling:
+    enabled: true
+    min_agents: 1
+    max_agents: 10
+    scale_up_threshold: 0.8
+    scale_down_threshold: 0.2
+
+# Advanced Features
+features:
+  natural_language_commands: true
+  voice_commands: false
+  collaborative_mode: true
+  learning_mode: true
+  custom_agent_creation: false
+  plugin_support: true
+  
+# Logging Configuration
+logging:
+  level: info
+  format: json
+  destinations:
+    - file: /var/log/techforge/agent.log
+    - stdout: true
+    - syslog: false
+  rotation:
+    enabled: true
+    max_size: 100MB
+    max_age: 30d
+    max_backups: 10
+
+# Update Settings
+updates:
+  auto_check: true
+  auto_update: false
+  channel: stable  # stable, beta, nightly
+  notification: true
+
+# Workspace Settings
+workspace:
+  base_path: ~/.techforge
+  temp_path: /tmp/techforge
+  cache_path: ~/.techforge/cache
+  logs_path: ~/.techforge/logs
+  
+# License Information
+license:
+  type: enterprise
+  seats: unlimited
+  expires: 2026-01-01
+  features:
+    - all_agents
+    - priority_support
+    - custom_training
+    - on_premise_deployment
+    - sla_guarantee

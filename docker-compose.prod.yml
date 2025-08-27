@@ -1,0 +1,255 @@
+version: '3.8'
+
+services:
+  # TechForge API (Production)
+  api:
+    image: ${DOCKER_REGISTRY}/techforge-api:${VERSION:-latest}
+    container_name: techforge-api
+    restart: always
+    env_file:
+      - .env.production
+    environment:
+      APP_ENV: production
+      DEBUG: "false"
+      LOG_LEVEL: WARNING
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - /var/log/techforge:/app/logs
+      - /var/lib/techforge/data:/app/data
+    networks:
+      - techforge-network
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
+
+  # Nginx Load Balancer (Production)
+  nginx:
+    image: nginx:alpine
+    container_name: techforge-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx-prod.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/log/nginx:/var/log/nginx
+    depends_on:
+      - api
+    networks:
+      - techforge-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # Redis Cluster (Production)
+  redis:
+    image: redis:7-alpine
+    container_name: techforge-redis
+    restart: always
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    volumes:
+      - /var/lib/redis:/data
+    networks:
+      - techforge-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # Celery Worker Pool (Production)
+  celery-worker:
+    image: ${DOCKER_REGISTRY}/techforge-api:${VERSION:-latest}
+    command: celery -A api.celery_app worker --loglevel=warning --concurrency=8 --max-tasks-per-child=1000
+    restart: always
+    env_file:
+      - .env.production
+    environment:
+      APP_ENV: production
+      C_FORCE_ROOT: "true"
+    volumes:
+      - /var/log/techforge:/app/logs
+      - /var/lib/techforge/data:/app/data
+    networks:
+      - techforge-network
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+    depends_on:
+      - redis
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
+
+  # Celery Beat Scheduler (Production)
+  celery-beat:
+    image: ${DOCKER_REGISTRY}/techforge-api:${VERSION:-latest}
+    command: celery -A api.celery_app beat --loglevel=warning
+    restart: always
+    env_file:
+      - .env.production
+    environment:
+      APP_ENV: production
+    volumes:
+      - /var/log/techforge:/app/logs
+      - /var/lib/techforge/celerybeat:/app/celerybeat
+    networks:
+      - techforge-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    depends_on:
+      - redis
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # Prometheus (Metrics Collection)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: techforge-prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus-prod.yml:/etc/prometheus/prometheus.yml:ro
+      - /var/lib/prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    networks:
+      - techforge-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # Grafana (Monitoring Dashboard)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: techforge-grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - /var/lib/grafana:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_SERVER_ROOT_URL=https://monitoring.techforge.ai
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_AUTH_BASIC_ENABLED=true
+      - GF_SECURITY_ALLOW_EMBEDDING=false
+    depends_on:
+      - prometheus
+    networks:
+      - techforge-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+networks:
+  techforge-network:
+    driver: overlay
+    attachable: true
+    ipam:
+      config:
+        - subnet: 10.0.0.0/16

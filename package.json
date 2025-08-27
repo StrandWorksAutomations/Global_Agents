@@ -1,0 +1,115 @@
+{
+  "name": "techforge-agent-suite",
+  "version": "2.0.0",
+  "description": "Enterprise-Grade AI Development Team at Your Command",
+  "main": "index.js",
+  "bin": {
+    "techforge": "./cli/techforge.py"
+  },
+  "scripts": {
+    "start": "python3 cli/techforge.py",
+    "init": "python3 cli/techforge.py init",
+    "deploy": "python3 cli/techforge.py deploy --team fullstack",
+    "status": "python3 cli/techforge.py status",
+    "test": "pytest tests/",
+    "lint": "pylint cli/",
+    "format": "black cli/ --line-length 100",
+    "build": "python3 setup.py sdist bdist_wheel",
+    "install-global": "pip install -e .",
+    "docs": "mkdocs serve",
+    "docker-build": "docker build -t techforge:latest .",
+    "docker-run": "docker run -it techforge:latest"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "development",
+    "automation",
+    "enterprise",
+    "devops",
+    "backend",
+    "frontend",
+    "full-stack",
+    "code-generation",
+    "refactoring",
+    "testing",
+    "security"
+  ],
+  "author": "TechForge AI",
+  "license": "Proprietary",
+  "homepage": "https://techforge.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/techforge/agent-suite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/techforge/agent-suite/issues"
+  },
+  "engines": {
+    "python": ">=3.8",
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "pyyaml": "^6.0.1",
+    "click": "^8.1.7",
+    "rich": "^13.7.0",
+    "requests": "^2.31.0",
+    "aiohttp": "^3.9.1",
+    "pydantic": "^2.5.0",
+    "python-dotenv": "^1.0.0"
+  },
+  "devDependencies": {
+    "pytest": "^7.4.3",
+    "pytest-cov": "^4.1.0",
+    "black": "^23.11.0",
+    "pylint": "^3.0.3",
+    "mypy": "^1.7.1",
+    "mkdocs": "^1.5.3",
+    "mkdocs-material": "^9.4.14"
+  },
+  "techforge": {
+    "version": "2.0.0",
+    "agents": 14,
+    "supported_languages": [
+      "Python",
+      "JavaScript",
+      "TypeScript",
+      "Java",
+      "Go",
+      "Rust",
+      "C++",
+      "Swift",
+      "Kotlin",
+      "Ruby",
+      "PHP",
+      "C#",
+      "Scala",
+      "Elixir"
+    ],
+    "supported_frameworks": [
+      "React",
+      "Vue",
+      "Angular",
+      "Next.js",
+      "Django",
+      "Flask",
+      "FastAPI",
+      "Spring",
+      "Express",
+      "NestJS",
+      "Rails",
+      "Laravel",
+      "Unity",
+      "Unreal"
+    ],
+    "cloud_providers": [
+      "AWS",
+      "Google Cloud",
+      "Azure",
+      "DigitalOcean",
+      "Heroku",
+      "Vercel",
+      "Netlify"
+    ]
+  }
+}

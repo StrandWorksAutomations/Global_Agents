@@ -1,0 +1,216 @@
+version: '3.8'
+
+services:
+  techforge-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: techforge-api
+    restart: unless-stopped
+    environment:
+      - TECHFORGE_API_PORT=8080
+      - TECHFORGE_WS_PORT=8081
+      - TECHFORGE_ENV=production
+      - POSTGRES_HOST=postgres
+      - REDIS_HOST=redis
+      - TECHFORGE_LOG_LEVEL=info
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    volumes:
+      - techforge-data:/data
+      - techforge-config:/config
+      - techforge-logs:/logs
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - techforge-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  techforge-dashboard:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dashboard
+    container_name: techforge-dashboard
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - API_URL=http://techforge-api:8080
+      - WS_URL=ws://techforge-api:8081
+    ports:
+      - "3000:3000"
+    depends_on:
+      - techforge-api
+    networks:
+      - techforge-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: techforge-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: techforge
+      POSTGRES_USER: techforge
+      POSTGRES_PASSWORD: techforge_secure_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - techforge-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U techforge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: techforge-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass techforge_redis_password
+    volumes:
+      - redis-data:/data
+    networks:
+      - techforge-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  nginx:
+    image: nginx:alpine
+    container_name: techforge-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - techforge-api
+      - techforge-dashboard
+    networks:
+      - techforge-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: techforge-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - techforge-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: techforge-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=techforge_admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    networks:
+      - techforge-network
+
+  agent-backend:
+    image: techforge/agent-backend:latest
+    container_name: techforge-agent-backend
+    restart: unless-stopped
+    environment:
+      - AGENT_ID=backend-expert
+      - API_URL=http://techforge-api:8080
+      - REDIS_HOST=redis
+    depends_on:
+      - techforge-api
+      - redis
+    networks:
+      - techforge-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  agent-frontend:
+    image: techforge/agent-frontend:latest
+    container_name: techforge-agent-frontend
+    restart: unless-stopped
+    environment:
+      - AGENT_ID=frontend-expert
+      - API_URL=http://techforge-api:8080
+      - REDIS_HOST=redis
+    depends_on:
+      - techforge-api
+      - redis
+    networks:
+      - techforge-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+
+  agent-database:
+    image: techforge/agent-database:latest
+    container_name: techforge-agent-database
+    restart: unless-stopped
+    environment:
+      - AGENT_ID=database-expert
+      - API_URL=http://techforge-api:8080
+      - POSTGRES_HOST=postgres
+      - REDIS_HOST=redis
+    depends_on:
+      - techforge-api
+      - postgres
+      - redis
+    networks:
+      - techforge-network
+
+volumes:
+  techforge-data:
+    driver: local
+  techforge-config:
+    driver: local
+  techforge-logs:
+    driver: local
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+networks:
+  techforge-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -1,0 +1,1112 @@
+openapi: 3.0.3
+info:
+  title: TechForge AI Agent Suite API
+  description: |
+    Enterprise-grade API for managing AI development agents
+    
+    The TechForge API provides programmatic access to deploy, manage, and orchestrate AI agents for software development tasks. 
+    
+    Features:
+    - Deploy and manage 14 specialized AI agents
+    - Execute tasks with intelligent orchestration
+    - Real-time monitoring and analytics
+    - Team coordination and collaboration
+    - Enterprise security and compliance
+    
+    ## Authentication
+    All requests require an API key in the Authorization header:
+    ```
+    Authorization: Bearer your-api-key
+    ```
+    
+    ## Rate Limits
+    - Starter: 100 requests/minute
+    - Professional: 1000 requests/minute  
+    - Enterprise: Unlimited
+    
+    ## WebSocket Support
+    Real-time updates available via WebSocket at `wss://stream.techforge.ai/v2`
+    
+  version: 2.0.0
+  contact:
+    name: TechForge Support
+    url: https://techforge.ai/support
+    email: api-support@techforge.ai
+  license:
+    name: Proprietary
+    url: https://techforge.ai/license
+  termsOfService: https://techforge.ai/terms
+
+servers:
+  - url: https://api.techforge.ai/v2
+    description: Production server
+  - url: https://staging-api.techforge.ai/v2
+    description: Staging server
+  - url: http://localhost:8080
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ========== Health & Status ==========
+  /health:
+    get:
+      summary: Health check
+      description: Check API health and status
+      tags: [System]
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /version:
+    get:
+      summary: API version information
+      tags: [System]
+      security: []
+      responses:
+        '200':
+          description: Version information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionResponse'
+
+  # ========== Authentication ==========
+  /auth/token:
+    post:
+      summary: Generate access token
+      description: Exchange API key for JWT access token
+      tags: [Authentication]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+      responses:
+        '200':
+          description: Token generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ========== Agents ==========
+  /agents:
+    get:
+      summary: List available agents
+      description: Get list of all available AI agents with their capabilities
+      tags: [Agents]
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Agent'
+
+  /agents/deploy:
+    post:
+      summary: Deploy an agent
+      description: Deploy a specific AI agent for use
+      tags: [Agents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeployAgentRequest'
+      responses:
+        '201':
+          description: Agent deployed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+
+  /agents/{agentId}:
+    get:
+      summary: Get agent details
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /agents/{agentId}/status:
+    get:
+      summary: Get agent status
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Agent status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentStatus'
+
+  /agents/{agentId}/execute:
+    post:
+      summary: Execute task with agent
+      description: Execute a development task using the specified agent
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteTaskRequest'
+      responses:
+        '200':
+          description: Task execution result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /agents/{agentId}/config:
+    put:
+      summary: Update agent configuration
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentConfig'
+      responses:
+        '200':
+          description: Configuration updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentConfig'
+
+  /agents/{agentId}/shutdown:
+    post:
+      summary: Shutdown agent
+      tags: [Agents]
+      parameters:
+        - $ref: '#/components/parameters/AgentId'
+      responses:
+        '200':
+          description: Agent shutdown successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ========== Teams ==========
+  /teams:
+    get:
+      summary: List team presets
+      tags: [Teams]
+      responses:
+        '200':
+          description: List of team presets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamPreset'
+
+  /teams/deploy:
+    post:
+      summary: Deploy agent team
+      description: Deploy a pre-configured team of agents
+      tags: [Teams]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeployTeamRequest'
+      responses:
+        '201':
+          description: Team deployed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamDeploymentResponse'
+
+  /teams/{teamId}:
+    get:
+      summary: Get team details
+      tags: [Teams]
+      parameters:
+        - $ref: '#/components/parameters/TeamId'
+      responses:
+        '200':
+          description: Team details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+  /teams/{teamId}/execute:
+    post:
+      summary: Execute team task
+      description: Execute a complex task requiring multiple agents
+      tags: [Teams]
+      parameters:
+        - $ref: '#/components/parameters/TeamId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamTaskRequest'
+      responses:
+        '200':
+          description: Team task result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamTaskResult'
+
+  # ========== Tasks ==========
+  /tasks:
+    get:
+      summary: List tasks
+      tags: [Tasks]
+      parameters:
+        - $ref: '#/components/parameters/Status'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskList'
+
+  /tasks/{taskId}:
+    get:
+      summary: Get task details
+      tags: [Tasks]
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResult'
+
+  /tasks/stream:
+    post:
+      summary: Stream task execution
+      description: Execute task with real-time streaming updates
+      tags: [Tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StreamTaskRequest'
+      responses:
+        '200':
+          description: Streaming started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StreamResponse'
+
+  # ========== Insights ==========
+  /insights:
+    get:
+      summary: Get AI insights
+      description: Get AI-powered insights about your project
+      tags: [Insights]
+      parameters:
+        - name: severity
+          in: query
+          schema:
+            type: string
+            enum: [critical, warning, info]
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [performance, security, quality, design]
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: List of insights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsightsList'
+
+  # ========== Analytics ==========
+  /analytics:
+    get:
+      summary: Get analytics data
+      tags: [Analytics]
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [hour, day, week, month]
+            default: week
+        - name: metric
+          in: query
+          schema:
+            type: string
+            enum: [productivity, performance, quality, cost]
+      responses:
+        '200':
+          description: Analytics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Analytics'
+
+  /analytics/export:
+    get:
+      summary: Export analytics data
+      tags: [Analytics]
+      parameters:
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [json, csv, xlsx]
+            default: json
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [week, month, quarter, year]
+            default: month
+      responses:
+        '200':
+          description: Exported data
+          content:
+            application/json:
+              schema:
+                type: object
+            text/csv:
+              schema:
+                type: string
+
+  # ========== Orchestration ==========
+  /orchestration/analyze:
+    post:
+      summary: Analyze task for orchestration
+      description: Analyze a task and get orchestration plan
+      tags: [Orchestration]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskAnalysisRequest'
+      responses:
+        '200':
+          description: Task analysis
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskAnalysis'
+
+  /orchestration/execute:
+    post:
+      summary: Execute orchestrated task
+      tags: [Orchestration]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrchestrationRequest'
+      responses:
+        '200':
+          description: Orchestration result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrchestrationResult'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    AgentId:
+      name: agentId
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [backend-expert, frontend-expert, database-expert, devops-expert, security-expert, qa-expert, ai-ml-expert, mobile-expert, game-expert, hardware-iot-expert, uiux-principal, web-design-agent, refactor-agent]
+
+    TeamId:
+      name: teamId
+      in: path
+      required: true
+      schema:
+        type: string
+
+    TaskId:
+      name: taskId
+      in: path
+      required: true
+      schema:
+        type: string
+
+    Status:
+      name: status
+      in: query
+      schema:
+        type: string
+        enum: [pending, in_progress, completed, failed, cancelled]
+
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+    Offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+
+  schemas:
+    # ========== System ==========
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        uptime:
+          type: number
+        services:
+          type: object
+          properties:
+            database:
+              type: string
+              enum: [healthy, unhealthy]
+            redis:
+              type: string
+              enum: [healthy, unhealthy]
+            agents:
+              type: string
+              enum: [healthy, unhealthy]
+
+    VersionResponse:
+      type: object
+      properties:
+        version:
+          type: string
+        build:
+          type: string
+        release_date:
+          type: string
+          format: date
+        api_version:
+          type: string
+
+    # ========== Authentication ==========
+    TokenRequest:
+      type: object
+      required: [api_key]
+      properties:
+        api_key:
+          type: string
+          description: Your TechForge API key
+
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          enum: [bearer]
+        expires_in:
+          type: integer
+        refresh_token:
+          type: string
+
+    # ========== Agents ==========
+    Agent:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        specialization:
+          type: string
+        tech_stack:
+          type: array
+          items:
+            type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [available, deploying, active, busy, error, maintenance]
+        pricing_tier:
+          type: string
+          enum: [starter, professional, enterprise]
+        resource_requirements:
+          type: object
+          properties:
+            cpu:
+              type: number
+            memory:
+              type: string
+            gpu:
+              type: boolean
+
+    DeployAgentRequest:
+      type: object
+      required: [agent_id]
+      properties:
+        agent_id:
+          type: string
+        config:
+          type: object
+        resource_limits:
+          type: object
+          properties:
+            cpu:
+              type: number
+            memory:
+              type: string
+            timeout:
+              type: integer
+
+    DeploymentResponse:
+      type: object
+      properties:
+        agent_id:
+          type: string
+        deployment_id:
+          type: string
+        status:
+          type: string
+        deployed_at:
+          type: string
+          format: date-time
+        config:
+          type: object
+
+    AgentStatus:
+      type: object
+      properties:
+        agent_id:
+          type: string
+        status:
+          type: string
+          enum: [active, busy, idle, error, maintenance]
+        current_task:
+          type: string
+        tasks_completed:
+          type: integer
+        uptime:
+          type: number
+        performance_metrics:
+          type: object
+          properties:
+            avg_response_time:
+              type: number
+            success_rate:
+              type: number
+            accuracy_score:
+              type: number
+
+    AgentConfig:
+      type: object
+      properties:
+        languages:
+          type: array
+          items:
+            type: string
+        frameworks:
+          type: array
+          items:
+            type: string
+        auto_optimization:
+          type: boolean
+        quality_threshold:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    # ========== Tasks ==========
+    ExecuteTaskRequest:
+      type: object
+      required: [task]
+      properties:
+        task:
+          type: string
+          description: Description of the task to execute
+        options:
+          type: object
+          properties:
+            priority:
+              type: string
+              enum: [low, normal, high, urgent]
+            timeout:
+              type: integer
+            context:
+              type: object
+            streaming:
+              type: boolean
+
+    TaskResult:
+      type: object
+      properties:
+        task_id:
+          type: string
+        agent_id:
+          type: string
+        status:
+          type: string
+          enum: [pending, in_progress, completed, failed, cancelled]
+        output:
+          oneOf:
+            - type: string
+            - type: object
+        metrics:
+          type: object
+          properties:
+            execution_time:
+              type: number
+            tokens_used:
+              type: integer
+            accuracy_score:
+              type: number
+        timestamp:
+          type: string
+          format: date-time
+        error:
+          type: string
+
+    TaskList:
+      type: object
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskResult'
+        total:
+          type: integer
+        page:
+          type: integer
+        per_page:
+          type: integer
+
+    StreamTaskRequest:
+      type: object
+      required: [task, stream_id]
+      properties:
+        task:
+          type: string
+        stream_id:
+          type: string
+        options:
+          type: object
+
+    StreamResponse:
+      type: object
+      properties:
+        stream_id:
+          type: string
+        status:
+          type: string
+        websocket_url:
+          type: string
+
+    # ========== Teams ==========
+    TeamPreset:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        agents:
+          type: array
+          items:
+            type: string
+        coordination:
+          type: string
+          enum: [orchestrated, collaborative, hierarchical, agile]
+        use_cases:
+          type: array
+          items:
+            type: string
+
+    DeployTeamRequest:
+      type: object
+      required: [preset]
+      properties:
+        preset:
+          type: string
+          enum: [fullstack, mobile, enterprise, mvp, modernize, saas, gamedev, iot, ai-powered, design-focused]
+        config:
+          type: object
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        agents:
+          type: array
+          items:
+            type: string
+        coordination:
+          type: string
+        deployed_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+
+    TeamDeploymentResponse:
+      type: object
+      properties:
+        team_id:
+          type: string
+        name:
+          type: string
+        agents:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+
+    TeamTaskRequest:
+      type: object
+      required: [task]
+      properties:
+        task:
+          type: string
+        options:
+          type: object
+        coordination_mode:
+          type: string
+
+    TeamTaskResult:
+      type: object
+      properties:
+        task_id:
+          type: string
+        team_id:
+          type: string
+        status:
+          type: string
+        agents_involved:
+          type: array
+          items:
+            type: string
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskResult'
+        coordination_log:
+          type: array
+          items:
+            type: object
+        total_time:
+          type: number
+
+    # ========== Insights ==========
+    Insight:
+      type: object
+      properties:
+        id:
+          type: string
+        agent_id:
+          type: string
+        category:
+          type: string
+          enum: [performance, security, quality, design, cost]
+        severity:
+          type: string
+          enum: [critical, warning, info]
+        title:
+          type: string
+        finding:
+          type: string
+        recommendation:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        timestamp:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+
+    InsightsList:
+      type: object
+      properties:
+        insights:
+          type: array
+          items:
+            $ref: '#/components/schemas/Insight'
+        summary:
+          type: object
+          properties:
+            total:
+              type: integer
+            by_severity:
+              type: object
+              properties:
+                critical:
+                  type: integer
+                warning:
+                  type: integer
+                info:
+                  type: integer
+
+    # ========== Analytics ==========
+    Analytics:
+      type: object
+      properties:
+        period:
+          type: string
+        metrics:
+          type: object
+          properties:
+            tasks_completed:
+              type: integer
+            productivity_gain:
+              type: number
+            time_saved:
+              type: number
+            cost_savings:
+              type: number
+            success_rate:
+              type: number
+        agent_performance:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              tasks_completed:
+                type: integer
+              avg_response_time:
+                type: number
+              success_rate:
+                type: number
+        trends:
+          type: object
+
+    # ========== Orchestration ==========
+    TaskAnalysisRequest:
+      type: object
+      required: [task]
+      properties:
+        task:
+          type: string
+        context:
+          type: object
+
+    TaskAnalysis:
+      type: object
+      properties:
+        task_id:
+          type: string
+        complexity:
+          type: string
+          enum: [simple, moderate, complex, expert]
+        domains:
+          type: array
+          items:
+            type: string
+        required_agents:
+          type: array
+          items:
+            type: string
+        subtasks:
+          type: array
+          items:
+            type: object
+        dependencies:
+          type: object
+        estimated_time:
+          type: number
+        confidence:
+          type: number
+
+    OrchestrationRequest:
+      type: object
+      required: [task]
+      properties:
+        task:
+          type: string
+        agents:
+          type: array
+          items:
+            type: string
+        coordination:
+          type: string
+
+    OrchestrationResult:
+      type: object
+      properties:
+        task_id:
+          type: string
+        status:
+          type: string
+        execution_plan:
+          type: object
+        results:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+              code:
+                type: integer
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+
+    PaymentRequired:
+      description: Payment required - subscription limit reached
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+              upgrade_url:
+                type: string
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+
+    RateLimited:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+              retry_after:
+                type: integer
+
+tags:
+  - name: System
+    description: System health and information
+  - name: Authentication
+    description: API authentication
+  - name: Agents
+    description: AI agent management
+  - name: Teams
+    description: Agent team coordination
+  - name: Tasks
+    description: Task execution and management
+  - name: Insights
+    description: AI-powered insights
+  - name: Analytics
+    description: Performance analytics
+  - name: Orchestration
+    description: Intelligent task orchestration
+
+externalDocs:
+  description: TechForge Documentation
+  url: https://docs.techforge.ai

@@ -1,0 +1,110 @@
+version: '3.8'
+
+# Development Docker Compose - Optimized for rapid development
+services:
+  techforge-dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: techforge-dev
+    restart: "no"
+    environment:
+      - TECHFORGE_ENV=development
+      - TECHFORGE_DEBUG=true
+      - TECHFORGE_HOT_RELOAD=true
+      - POSTGRES_HOST=postgres-dev
+      - REDIS_HOST=redis-dev
+      - TECHFORGE_LOG_LEVEL=debug
+    ports:
+      - "8080:8080"   # API
+      - "8081:8081"   # WebSocket
+      - "3000:3000"   # Dashboard
+      - "5173:5173"   # Vite dev server
+    volumes:
+      - ../:/app:delegated
+      - node_modules:/app/node_modules
+      - /app/.git  # Exclude git folder
+    depends_on:
+      - postgres-dev
+      - redis-dev
+    networks:
+      - techforge-dev-network
+    command: ["python", "cli/techforge.py", "dev-server", "--hot-reload"]
+
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: techforge-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: techforge_dev
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+      - ./init-dev.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - techforge-dev-network
+
+  redis-dev:
+    image: redis:7-alpine
+    container_name: techforge-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass dev123
+    volumes:
+      - redis-dev-data:/data
+    networks:
+      - techforge-dev-network
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: techforge-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - techforge-dev-network
+
+  # Mock agent services for testing
+  mock-backend-agent:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.mock-agent
+    container_name: mock-backend-agent
+    environment:
+      - AGENT_ID=backend-expert
+      - AGENT_TYPE=mock
+      - API_URL=http://techforge-dev:8080
+    depends_on:
+      - techforge-dev
+    networks:
+      - techforge-dev-network
+
+  mock-frontend-agent:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.mock-agent
+    container_name: mock-frontend-agent
+    environment:
+      - AGENT_ID=frontend-expert
+      - AGENT_TYPE=mock
+      - API_URL=http://techforge-dev:8080
+    depends_on:
+      - techforge-dev
+    networks:
+      - techforge-dev-network
+
+volumes:
+  postgres-dev-data:
+    driver: local
+  redis-dev-data:
+    driver: local
+  node_modules:
+    driver: local
+
+networks:
+  techforge-dev-network:
+    driver: bridge

@@ -1,0 +1,85 @@
+{
+  "name": "opportunity-scanner",
+  "version": "2.0.0",
+  "description": "AI-powered business opportunity discovery from public discussions",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "worker": "node src/worker.js",
+    "build": "next build",
+    "web:dev": "next dev",
+    "web:build": "next build",
+    "web:start": "next start",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/ --ext .js,.ts,.tsx",
+    "lint:fix": "eslint src/ --ext .js,.ts,.tsx --fix",
+    "docker:build": "docker build -t opportunity-scanner .",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up",
+    "docker:prod": "docker-compose up -d",
+    "k8s:deploy": "kubectl apply -f k8s/",
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "bcryptjs": "^2.4.3",
+    "bull": "^4.12.0",
+    "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.3.2",
+    "joi": "^17.11.0",
+    "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.294.0",
+    "mongoose": "^8.0.0",
+    "natural": "^6.10.0",
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "snoowrap": "^1.23.0",
+    "node-cron": "^3.0.3",
+    "winston": "^3.11.0",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.55.0",
+    "eslint-config-next": "^14.0.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1",
+    "supertest": "^6.3.3",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "business-intelligence",
+    "opportunity-discovery",
+    "ai-powered",
+    "market-research",
+    "reddit-analysis",
+    "sentiment-analysis",
+    "startup-tools"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/opportunity-scanner"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/opportunity-scanner/issues"
+  }
+}
